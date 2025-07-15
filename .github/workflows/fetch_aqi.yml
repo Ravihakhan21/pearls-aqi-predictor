@@ -30,4 +30,5 @@ jobs:
         git config --global user.email 'khanraviha559@gmail.com'
         git add data/aqi_data.csv
         git commit -m "🌀 Update AQI data (GitHub Actions)" || echo "No changes to commit"
-        git push
+        git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/Ravihakhan21/pearls-aqi-predictor.git HEAD:main
+
