@@ -28,4 +28,9 @@ jobs:
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
       run: |
-        git config --global user.nam
+        git config --global user.name "Raviha Khan"
+        git config --global user.email "khanraviha559@gmail.com"
+        git add data/aqi_data.csv
+        git commit -m "🌀 Update AQI data (GitHub Actions)" || echo "No changes to commit"
+        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Ravihakhan21/pearls-aqi-predictor.git
+        git push origin HEAD:main
