@@ -16,14 +16,14 @@ data = response.json()
 # ✅ STEP 4: If response is valid, extract fields
 if data['status'] == 'ok':
     aqi = data['data']['aqi']
-    timestamp = data['data']['time']['s']
+    timestamp = data['data']['time']['s']  # Already formatted timestamp from API
     iaqi = data['data']['iaqi']
 
     temp = iaqi.get('t', {}).get('v')
     humidity = iaqi.get('h', {}).get('v')
     wind = iaqi.get('w', {}).get('v')
 
-    # ✅ STEP 5: Store in a dictionary
+    # ✅ STEP 5: Prepare data row
     record = {
         'timestamp': timestamp,
         'aqi': aqi,
@@ -32,15 +32,18 @@ if data['status'] == 'ok':
         'wind_speed': wind
     }
 
-    # ✅ STEP 6: Convert to DataFrame
     df = pd.DataFrame([record])
 
-    # ✅ STEP 7: Save to CSV (create folder if not exist)
-    os.makedirs('../data', exist_ok=True)
-    file_path = '../data/aqi_data.csv'
+    # ✅ STEP 6: Set file path (fixed!)
+    os.makedirs('data', exist_ok=True)
+    file_path = 'data/aqi_data.csv'
 
-    # Append if file exists
+    # ✅ STEP 7: Avoid duplicate entries
     if os.path.exists(file_path):
+        existing_df = pd.read_csv(file_path)
+        if timestamp in existing_df['timestamp'].values:
+            print("⏩ Timestamp already exists, skipping entry.")
+            exit()
         df.to_csv(file_path, mode='a', header=False, index=False)
     else:
         df.to_csv(file_path, index=False)
