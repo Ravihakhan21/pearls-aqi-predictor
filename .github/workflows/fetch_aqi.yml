@@ -12,11 +12,13 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}  # Important to allow write access
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install dependencies
         run: pip install requests pandas
@@ -34,4 +36,3 @@ jobs:
           git commit -m "🌀 Update AQI data (GitHub Actions)" || echo "No changes to commit"
           git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Ravihakhan21/pearls-aqi-predictor.git
           git push origin HEAD:main
-
