@@ -1,54 +1,65 @@
 import requests
-import pandas as pd
-from datetime import datetime
+import json
 import os
+from datetime import datetime
 
-# ✅ STEP 1: Your AQICN API token
-TOKEN = "36ff5b37dedc8de6a3d64ea07c42b99ed300f646"  # Replace with your token
+# ✅ API Details
+API_KEY = "b148549bdddc328bcfdd06ab71e9828a"
+LAT = 24.8607
+LON = 67.0011
+url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={LAT}&lon={LON}&appid={API_KEY}"
 
-# ✅ STEP 2: API endpoint for Karachi
-url = f"https://api.waqi.info/feed/karachi/?token={TOKEN}"
+# ✅ Mapping AQI category (1–5) to regression value
+aqi_mapping = {
+    1: 40,
+    2: 80,
+    3: 120,
+    4: 180,
+    5: 250
+}
 
-# ✅ STEP 3: Call the API
+# ✅ Fetch data
 response = requests.get(url)
 data = response.json()
 
-# ✅ STEP 4: If response is valid, extract fields
-if data['status'] == 'ok':
-    aqi = data['data']['aqi']
-    timestamp = data['data']['time']['s']  # Already formatted timestamp from API
-    iaqi = data['data']['iaqi']
+# ✅ Extract and transform
+aqi_cat = data["list"][0]["main"]["aqi"]
+components = data["list"][0]["components"]
+timestamp = datetime.now().replace(second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+aqi_mapped = aqi_mapping.get(aqi_cat, None)
 
-    temp = iaqi.get('t', {}).get('v')
-    humidity = iaqi.get('h', {}).get('v')
-    wind = iaqi.get('w', {}).get('v')
+# ✅ Save fields (excluding PM2.5 and PM10)
+record = {
+    "timestamp": timestamp,
+    "aqi": aqi_mapped,
+    "co": components.get("co"),
+    "no": components.get("no"),
+    "no2": components.get("no2"),
+    "o3": components.get("o3"),
+    "so2": components.get("so2"),
+    "nh3": components.get("nh3")
+}
 
-    # ✅ STEP 5: Prepare data row
-    record = {
-        'timestamp': timestamp,
-        'aqi': aqi,
-        'temperature': temp,
-        'humidity': humidity,
-        'wind_speed': wind
-    }
+# ✅ Create folder if not exist
+os.makedirs("data", exist_ok=True)
+json_file = "data/aqi_data.json"
 
-    df = pd.DataFrame([record])
-
-    # ✅ STEP 6: Set file path (fixed!)
-    os.makedirs('data', exist_ok=True)
-    file_path = 'data/aqi_data.csv'
-
-    # ✅ STEP 7: Avoid duplicate entries
-    if os.path.exists(file_path):
-        existing_df = pd.read_csv(file_path)
-        if timestamp in existing_df['timestamp'].values:
-            print("⏩ Timestamp already exists, skipping entry.")
-            exit()
-        df.to_csv(file_path, mode='a', header=False, index=False)
-    else:
-        df.to_csv(file_path, index=False)
-
-    print("✅ AQI + weather data saved to aqi_data.csv")
-
+# ✅ Load existing data
+if os.path.exists(json_file):
+    with open(json_file, 'r') as f:
+        try:
+            existing_data = json.load(f)
+        except json.JSONDecodeError:
+            existing_data = []
 else:
-    print("❌ API Error:", data.get('data'))
+    existing_data = []
+
+# ✅ Check for duplicate timestamp (within ±10 minutes window)
+timestamps = [item["timestamp"] for item in existing_data]
+if timestamp in timestamps:
+    print("⏩ Timestamp already exists, skipping entry.")
+else:
+    existing_data.append(record)
+    with open(json_file, 'w') as f:
+        json.dump(existing_data, f, indent=2)
+    print("✅ AQI data saved to aqi_data.json")
