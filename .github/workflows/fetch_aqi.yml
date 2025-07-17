@@ -1,9 +1,9 @@
-name: Hourly AQI Data Collection
+name: AQI Data Collection Every 10 Minutes
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # ⏱ Runs every 10 minutes (UTC)
-  workflow_dispatch:         # Allows manual run from GitHub UI
+    - cron: '*/10 * * * *'  # Every 10 minutes
+  workflow_dispatch:
 
 jobs:
   fetch-and-save:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_PAT }}  # Important to allow write access
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -24,6 +24,8 @@ jobs:
         run: pip install requests pandas
 
       - name: Run AQI Data Script
+        env:
+          OWM_API_KEY: ${{ secrets.OWM_API_KEY }}  # Inject API key into script
         run: python scripts/fetch_aqi_data.py
 
       - name: Commit and Push Updated JSON
