@@ -2,8 +2,8 @@ name: Hourly AQI Data Collection
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour (UTC)
-  workflow_dispatch:      # Allows manual run from GitHub UI
+    - cron: '*/10 * * * *'  # ⏱ Runs every 10 minutes (UTC)
+  workflow_dispatch:         # Allows manual run from GitHub UI
 
 jobs:
   fetch-and-save:
