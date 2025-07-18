@@ -2,8 +2,8 @@ name: Hourly AQI Data Collection
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # ⏱ Runs every 10 minutes (UTC)
-  workflow_dispatch:         # Allows manual run from GitHub UI
+    - cron: '0 * * * *'  # ⏱ Runs at the start of every hour (UTC)
+  workflow_dispatch:       # Allows manual run from GitHub UI
 
 jobs:
   fetch-and-save:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GH_PAT }}  # Important to allow write access
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
