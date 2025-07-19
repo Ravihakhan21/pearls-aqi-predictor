@@ -2,8 +2,8 @@ name: Hourly AQI Data Collection
 
 on:
   schedule:
-    - cron: '0 * * * *'  # ⏱ Runs at the start of every hour (UTC)
-  workflow_dispatch:       # Allows manual run from GitHub UI
+    - cron: '0 * * * *'  # ✅ Runs every hour (UTC)
+  workflow_dispatch:       # ✅ Allows manual trigger from GitHub UI
 
 jobs:
   fetch-and-save:
@@ -24,6 +24,8 @@ jobs:
         run: pip install requests pandas
 
       - name: Run AQI Data Script
+        env:
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}  # ✅ Inject WeatherAPI key
         run: python scripts/fetch_aqi_data.py
 
       - name: Commit and Push Updated JSON
@@ -33,6 +35,6 @@ jobs:
           git config --global user.name "Raviha Khan"
           git config --global user.email "khanraviha559@gmail.com"
           git add data/aqi_data.json
-          git commit -m "🌀 Update AQI data (GitHub Actions)" || echo "No changes to commit"
+          git commit -m "🌀 Hourly AQI data added from WeatherAPI" || echo "No changes to commit"
           git remote set-url origin https://x-access-token:${GH_PAT}@github.com/Ravihakhan21/pearls-aqi-predictor.git
           git push origin HEAD:main
