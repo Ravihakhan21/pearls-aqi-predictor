@@ -1,8 +1,8 @@
-name: AQI Data Collection Every 10 Minutes
+name: Hourly AQI Data Collection
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Every 10 minutes
+    - cron: '0 * * * *'  # ✅ Runs every hour (UTC)
   workflow_dispatch:
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Run AQI Data Script
         env:
-          OWM_API_KEY: ${{ secrets.OWM_API_KEY }}  # Inject API key into script
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
         run: python scripts/fetch_aqi_data.py
 
       - name: Commit and Push Updated JSON
