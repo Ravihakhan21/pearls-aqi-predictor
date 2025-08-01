@@ -4,72 +4,63 @@ import json
 from datetime import datetime, timedelta
 from time import sleep
 
-# 🔑 Load API key from environment variable
-API_KEY = os.environ.get("WEATHER_API_KEY")
+# ✅ Read API Key from environment (set it in PowerShell before running)
+API_KEY = os.getenv("WEATHER_API_KEY")
 if not API_KEY:
-    raise ValueError("❌ WEATHER_API_KEY not found. Please set it as environment variable.")
+    raise ValueError("❌ WEATHER_API_KEY not found. Please set it in your environment.")
 
-# 📍 Set your location (Karachi)
+# 📍 Location (Karachi)
 LOCATION = "Karachi"
 
-# 📅 Date Range: 1 Jan to 18 July 2025
-start_date = datetime(2025, 1, 1)
-end_date = datetime(2025, 7, 18)
+# 📅 Date Range (match Open-Meteo range)
+START_DATE = datetime(2025, 4, 1)
+END_DATE = datetime(2025, 7, 21)
 
-# 📁 JSON file to append to
-output_file = "data/aqi_data.json"
+# 📂 Output file
+OUTPUT_FILE = "data/historic_weather.json"
 
-# 📦 Load existing data if file exists
-try:
-    with open(output_file, "r") as f:
-        existing_data = json.load(f)
-except FileNotFoundError:
-    existing_data = []
+all_weather = []
 
-# 🚀 Loop through each date
-current = start_date
-while current <= end_date:
+current = START_DATE
+while current <= END_DATE:
     date_str = current.strftime("%Y-%m-%d")
-    print(f"📅 Fetching data for: {date_str}")
+    print(f"📅 Fetching hourly weather for {date_str}")
 
-    # 🛰 WeatherAPI endpoint for history
-    url = f"http://api.weatherapi.com/v1/history.json?key={API_KEY}&q={LOCATION}&dt={date_str}&hour=12"
-
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(f"❌ Failed to fetch data for {date_str}: {response.text}")
-        sleep(1)  # Wait before next call
-        current += timedelta(days=1)
-        continue
-
-    data = response.json()
+    url = f"http://api.weatherapi.com/v1/history.json?key={API_KEY}&q={LOCATION}&dt={date_str}"
 
     try:
-        hour_data = data["forecast"]["forecastday"][0]["hour"]
-        for record in hour_data:
+        resp = requests.get(url, timeout=20)
+        if resp.status_code != 200:
+            print(f"⚠️ Failed for {date_str}: {resp.text}")
+            sleep(2)
+            current += timedelta(days=1)
+            continue
+
+        data = resp.json()
+
+        # ✅ Extract all 24 hours
+        hours = data["forecast"]["forecastday"][0]["hour"]
+        for record in hours:
             row = {
-                "timestamp": record["time"],
-                "o3": record.get("ozone", None),
-                "co": record.get("co", None),
-                "no2": record.get("no2", None),
-                "so2": record.get("so2", None),
+                "timestamp": record["time"],         # full hourly timestamp
                 "temp_c": record["temp_c"],
                 "humidity": record["humidity"],
                 "wind_kph": record["wind_kph"],
                 "pressure_mb": record["pressure_mb"]
             }
-            existing_data.append(row)
+            all_weather.append(row)
 
-        print(f"✅ Data added for {date_str}")
-    except KeyError:
-        print(f"⚠️ Missing expected fields for {date_str}")
+        print(f"✅ Added {len(hours)} hourly records for {date_str}")
 
-    # ⏱ Be nice to the API
+    except Exception as e:
+        print(f"❌ Error for {date_str}: {e}")
+
+    # ⏱ Be nice to API (free tier has limits)
     sleep(1)
     current += timedelta(days=1)
 
-# 💾 Save back to file
-with open(output_file, "w") as f:
-    json.dump(existing_data, f, indent=2)
+# 💾 Save JSON
+with open(OUTPUT_FILE, "w") as f:
+    json.dump(all_weather, f, indent=2)
 
-print("🎉 Historic data collection complete!")
+print(f"🎉 Saved {len(all_weather)} hourly weather records to {OUTPUT_FILE}")
