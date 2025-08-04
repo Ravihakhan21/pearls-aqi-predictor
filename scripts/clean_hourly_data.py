@@ -32,7 +32,11 @@ before = len(df)
 df = df.drop_duplicates(subset=['timestamp'], keep='last')
 print(f"🗑️ Dropped {before - len(df)} duplicate timestamps")
 
-# 5️⃣ Sort chronologically
+# ✅ 5️⃣ Filter to keep only data from July 26, 2025 onward
+cutoff_date = datetime(2025, 7, 26)
+df = df[df['timestamp'] >= cutoff_date]
+
+# 6️⃣ Sort chronologically
 df = df.sort_values('timestamp')
 
 # ----------------- 💾 SAVE -----------------
