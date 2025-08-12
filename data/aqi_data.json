@@ -6607,5 +6607,16 @@
     "humidity": 79,
     "wind_kph": 25.6,
     "pressure_mb": 1002.0
+  },
+  {
+    "timestamp": "2025-08-12 20:10:59",
+    "o3": 35.0,
+    "co": 775.15,
+    "no2": 32.93,
+    "so2": 19.795,
+    "temp_c": 28.3,
+    "humidity": 79,
+    "wind_kph": 25.6,
+    "pressure_mb": 1001.0
   }
 ]
