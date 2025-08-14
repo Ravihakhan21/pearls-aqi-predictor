@@ -1,4 +1,6 @@
 name: Predict Live AQI
+permissions:
+  contents: write
 
 on:
   schedule:
