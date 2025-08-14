@@ -1,12 +1,11 @@
-# app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
-from pathlib import Path
 
-ROOT = Path(__file__).parent
-DATA_CLEAN = ROOT / "data" / "hourly_clean_updated.csv"
-PRED_CSV   = ROOT / "data" / "predictions_72h.csv"
+# URLs to CSVs in your GitHub repo
+DATA_CLEAN_URL = "https://raw.githubusercontent.com/Ravihakhan21/pearls-aqi-predictor/main/data/hourly_clean_updated.csv"
+PRED_CSV_URL   = "https://raw.githubusercontent.com/Ravihakhan21/pearls-aqi-predictor/main/data/predictions_72h.csv"
+
 
 st.set_page_config(page_title="PEARLS AQI Forecast", layout="wide")
 st.title("🌍 PEARLS — Live AQI & 72-hour Forecast")
@@ -19,8 +18,8 @@ def compute_aqi_row(row):
 
 # Sidebar: latest snapshot
 st.sidebar.header("Latest observed data")
-if DATA_CLEAN.exists():
-    df = pd.read_csv(DATA_CLEAN, parse_dates=['timestamp'])
+try:
+    df = pd.read_csv(DATA_CLEAN_URL, parse_dates=['timestamp'])
     if not df.empty:
         latest = df.sort_values('timestamp').iloc[-1]
         latest_aqi = latest['aqi'] if 'aqi' in latest and pd.notna(latest['aqi']) else compute_aqi_row(latest)
@@ -31,13 +30,13 @@ if DATA_CLEAN.exists():
         st.sidebar.write(latest[keep])
     else:
         st.sidebar.warning("Clean data exists but is empty.")
-else:
-    st.sidebar.warning("No cleaned data found. Run the cleaning script first.")
+except Exception:
+    st.sidebar.warning("Could not fetch latest clean data from GitHub.")
 
 # Main: forecast
 st.header("Next 72 hours — Forecast")
-if PRED_CSV.exists():
-    pred = pd.read_csv(PRED_CSV, parse_dates=['timestamp'])
+try:
+    pred = pd.read_csv(PRED_CSV_URL, parse_dates=['timestamp'])
     if not pred.empty:
         st.line_chart(pred.set_index('timestamp')['pred_aqi'])
         st.subheader("Forecast table")
@@ -47,5 +46,5 @@ if PRED_CSV.exists():
                            file_name="predictions_72h.csv")
     else:
         st.info("Predictions file exists but is empty.")
-else:
-    st.info("No predictions file yet. Run predict script or wait for CI.")
+except Exception:
+    st.info("Could not fetch predictions file from GitHub.")
