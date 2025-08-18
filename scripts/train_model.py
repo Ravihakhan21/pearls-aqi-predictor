@@ -1,3 +1,6 @@
+# 🚨 NOTE: This script was part of an earlier approach and is NOT used in the final pipeline.
+# It is kept here for reference only.
+
 """
 train_model.py
 ---------------
