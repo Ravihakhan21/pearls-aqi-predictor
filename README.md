@@ -6,7 +6,8 @@ This was my **first ever complete Data Science project** — I started with very
 
 The system predicts AQI for the next **72 hours** and is fully automated via **GitHub Actions**.  
 
-🔗 **Live Dashboard:** [View Here](https://pearls-aqi-predictor-afvljwkedamvjej2rtec4c.streamlit.app/)
+🔗 **Live Dashboard:** [View Here] https://pearls-aqi-predictor-afvljwkedamvjej2rtec4c.streamlit.app/
+
 
 ---
 
