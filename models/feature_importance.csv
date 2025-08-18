@@ -1,3 +1,6 @@
+# 🚨 NOTE: This script was part of an earlier approach and is NOT used in the final pipeline.
+# It is kept here for reference only.
+
 feature,importance
 o3,0.9829869795909479
 so2,0.014540511730940772
