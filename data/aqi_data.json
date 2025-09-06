@@ -12800,5 +12800,16 @@
     "humidity": 70,
     "wind_kph": 26.3,
     "pressure_mb": 1004.0
+  },
+  {
+    "timestamp": "2025-09-06 18:10:24",
+    "o3": 53.0,
+    "co": 847.3,
+    "no2": 31.45,
+    "so2": 25.53,
+    "temp_c": 29.3,
+    "humidity": 75,
+    "wind_kph": 24.1,
+    "pressure_mb": 1005.0
   }
 ]
